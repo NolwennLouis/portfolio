@@ -33,7 +33,7 @@ const ABOUT = {
 
   email: "nolwenn.louis.nl@gmail.com",
   links: [
-    { label: "LinkedIn", url: "www.linkedin.com/in/nolwenn-louis" }
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/nolwenn-louis" }
   ],
 
   cv: { fr: "cv/cv-fr.pdf", en: "cv/cv-en.pdf" },
