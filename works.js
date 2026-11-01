@@ -73,6 +73,19 @@ const WORKS = [
     featured: true
   },
   {
+    id: "animation-04",
+    title: "2D Animation",
+    category: "animation",
+    year: "2026",
+    tools: ["Krita"],
+    description:
+      "",
+    type: "video",
+    media: "videos/animation1.gif",
+    poster: "videos/animation1.gif",
+    featured: true
+  },
+  {
     id: "storyboard1",
     title: "BD",
     category: "storyboard",
@@ -125,6 +138,19 @@ const WORKS = [
     media: "videos/parodieMAIF.mp4",
     poster: "images/minia-MAIF.png",
     featured: false
+  },
+  {
+    id: "animation-05",
+    title: "2D Animation",
+    category: "animation",
+    year: "2026",
+    tools: ["Krita"],
+    description:
+      "",
+    type: "video",
+    media: "videos/animation2.gif",
+    poster: "videos/animation2.gif",
+    featured: true
   },
   {
     id: "other-01",
