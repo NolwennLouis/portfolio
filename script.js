@@ -119,7 +119,7 @@ function renderGallery() {
   items.forEach((work) => {
     const item = document.createElement("article");
     item.className = "gallery-item";
-    item.setAttribute("data-category", work.category);
+    item.setAttribute("data-category", categoriesOf(work).join(" "));
 
     const link = document.createElement("a");
     link.href = `oeuvre.html?id=${encodeURIComponent(work.id)}`;
@@ -156,7 +156,7 @@ function renderGallery() {
     caption.className = "gallery-caption";
     caption.innerHTML = `
       <div class="title">${escapeHtml(work.title)}</div>
-      <div class="category">${categoryLabel(work.category)} — ${escapeHtml(work.year)}</div>
+      <div class="category">${escapeHtml(categoryLabels(work))} — ${escapeHtml(work.year)}</div>
     `;
     link.appendChild(caption);
 
@@ -184,7 +184,7 @@ function setupFilters(gallery) {
       button.setAttribute("aria-pressed", "true");
 
       gallery.querySelectorAll(".gallery-item").forEach((item) => {
-        const match = filter === "all" || item.getAttribute("data-category") === filter;
+        const match = matchesFilter(item.getAttribute("data-category"), filter);
         item.classList.toggle("is-hidden", !match);
       });
     });
@@ -245,7 +245,7 @@ function renderArtworkPage() {
   document.title = `${work.title} — ${ABOUT.name}`;
 
   document.querySelector("[data-artwork-category]").textContent =
-    `${categoryLabel(work.category)} — ${work.year}`;
+    `${categoryLabels(work)} — ${work.year}`;
   document.querySelector("[data-artwork-title]").textContent = work.title;
   document.querySelector("[data-artwork-description]").textContent = work.description;
 
@@ -367,6 +367,22 @@ function getEmbedInfo(url) {
 /* -------------------------------------------------------------------------
    Utilitaires
    ----------------------------------------------------------------------- */
+/* Une œuvre peut avoir UNE catégorie ("sketchbook") ou PLUSIEURS
+   (["sketchbook", "character-design"]). Ces trois fonctions gèrent les deux
+   cas. Une œuvre multi-catégories n'est affichée qu'une seule fois dans
+   "All" et apparaît dans chacun de ses filtres. */
+function categoriesOf(work) {
+  return Array.isArray(work.category) ? work.category : [work.category];
+}
+
+function categoryLabels(work) {
+  return categoriesOf(work).map(categoryLabel).join(" / ");
+}
+
+function matchesFilter(categoryAttribute, filter) {
+  return filter === "all" || (categoryAttribute || "").split(" ").includes(filter);
+}
+
 function categoryLabel(category) {
   const labels = {
     "character-design": "Character Design",

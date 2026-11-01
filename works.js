@@ -49,14 +49,13 @@ const WORKS = [
     year: "2026",
     tools: ["Krita", "After Effects"],
     description:
-      "Réalisation d'un mini film d'animation dans le cadre d'un projet de cours. L'animation a été faite en frame par frame sur Krita et le montage final sur After effects. ",
-    type: "image",                  // "image" ou "video"
+      "Fiche de personnage pour un projet de film d'animation en cours de réalisation",
+    type: "image",                 
     media: "images/charadesign-01.png",
-    featured: true,                 // true = apparaît sur la page d'accueil
-    // Exemple d'œuvre avec plusieurs images (recherches + finale) :
+    featured: true,                
     gallery: [
-      { src: "images/charadesign-01.PNG", caption: "Design final" },
-      { src: "images/charadesign-01.PNG", caption: "Recherches et explorations de silhouettes" }
+      { src: "images/charadesign-01.PNG", caption: "Fiche personnage" },
+      { src: "videos/Animation2.gif", caption: "Une séquence de l'animation" }
     ]
   },
   {
@@ -233,7 +232,7 @@ const WORKS = [
   {
     id: "sketchbook-02",
     title: "Pages de carnet",
-    category: "sketchbook",
+    category: ["sketchbook","character-design"],
     year: "2025",
     tools: ["Crayon"],
     description: "",
@@ -244,7 +243,7 @@ const WORKS = [
   {
     id: "sketchbook-03",
     title: "etudes de poses",
-    category: "sketchbook",
+    category: ["sketchbook","character-design"],
     year: "2025",
     tools: ["Crayon"],
     description: "",
@@ -332,7 +331,7 @@ const WORKS = [
   {
     id: "sketchbook-11",
     title: "Études de poses",
-    category: "sketchbook",
+    category: ["sketchbook","character-design"],
     year: "2025",
     tools: ["Crayon"],
     description: "",
@@ -343,7 +342,7 @@ const WORKS = [
   {
     id: "sketchbook-12",
     title: "Études de poses",
-    category: "sketchbook",
+    category: ["sketchbook","character-design"],
     year: "2025",
     tools: ["Crayon"],
     description: "",
@@ -365,7 +364,7 @@ const WORKS = [
   {
     id: "sketchbook-14",
     title: "Études de poses",
-    category: "sketchbook",
+    category: ["sketchbook","character-design"],
     year: "2025",
     tools: ["Crayon"],
     description: "",
@@ -376,7 +375,7 @@ const WORKS = [
   {
     id: "sketchbook-15",
     title: "Études de poses",
-    category: "sketchbook",
+    category: ["sketchbook","character-design"],
     year: "2025",
     tools: ["Crayon"],
     description: "",
