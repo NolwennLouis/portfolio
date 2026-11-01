@@ -2,22 +2,177 @@
    script.js — COMPORTEMENTS DU SITE
    -------------------------------------------------------------------------
    Tu ne devrais normalement jamais avoir besoin de modifier ce fichier :
-   il lit simplement le contenu de works.js et about.js et l'affiche.
+   il lit simplement le contenu de works.js, about.js et lang.js et l'affiche.
 
-   Ce fichier est découpé en 4 parties, indépendantes les unes des autres :
+   Ce fichier est découpé en parties indépendantes :
+     0. Langue (FR / EN) : choix de la langue, bouton, traduction des textes
      1. Remplissage automatique des infos perso (about.js)
      2. Génération de la galerie d'œuvres (works.js)
      3. Filtres par catégorie (page Work)
      4. Page de détail d'une œuvre (oeuvre.html)
    ========================================================================= */
 
+const LANGUAGES = ["fr", "en"];
+const LANG_STORAGE_KEY = "portfolio-lang";
+let currentLang = detectLanguage();
+
 document.addEventListener("DOMContentLoaded", () => {
+  setupLanguageSwitch();
+  renderAll(false);
+  setupFilters(document.querySelector("[data-gallery]"));
+});
+
+/* Affiche (ou réaffiche, après un changement de langue) tout le contenu. */
+function renderAll(isLanguageChange) {
+  document.documentElement.lang = currentLang;
+  applyStaticTranslations();
+  applyPageMeta();
   fillAboutInfo();
   const gallery = renderGallery();
-  setupFilters(gallery);
-  setupScrollReveal();
+  if (gallery && isLanguageChange) gallery.classList.add("no-fade");
+  applyCurrentFilter(gallery);
+  setupScrollReveal(isLanguageChange);
   renderArtworkPage();
-});
+  updateSwitchState();
+}
+
+/* -------------------------------------------------------------------------
+   0. LANGUE (FR / EN)
+   Ordre de priorité pour choisir la langue au chargement :
+     1. ?lang=en (ou ?lang=fr) dans l'adresse de la page
+     2. le dernier choix du visiteur (mémorisé dans son navigateur)
+     3. DEFAULT_LANGUAGE dans lang.js ; si "auto" : la langue du navigateur
+        (français si son navigateur est en français, anglais sinon)
+   ----------------------------------------------------------------------- */
+function detectLanguage() {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get("lang");
+    if (LANGUAGES.includes(fromUrl)) {
+      saveLanguage(fromUrl);
+      return fromUrl;
+    }
+  } catch (e) { /* on continue */ }
+
+  try {
+    const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
+    if (LANGUAGES.includes(saved)) return saved;
+  } catch (e) { /* stockage indisponible : on continue */ }
+
+  const configured = typeof DEFAULT_LANGUAGE !== "undefined" ? DEFAULT_LANGUAGE : "auto";
+  if (LANGUAGES.includes(configured)) return configured;
+
+  const browserLang = (navigator.language || "").toLowerCase();
+  return browserLang.startsWith("fr") ? "fr" : "en";
+}
+
+function saveLanguage(code) {
+  try { window.localStorage.setItem(LANG_STORAGE_KEY, code); } catch (e) { /* pas grave */ }
+}
+
+function setLanguage(code) {
+  if (!LANGUAGES.includes(code) || code === currentLang) return;
+  currentLang = code;
+  saveLanguage(code);
+  renderAll(true);
+}
+
+/* Crée le bouton FR / EN dans la navigation (aucun HTML à écrire). */
+function setupLanguageSwitch() {
+  const host = document.querySelector(".site-nav") || document.querySelector(".site-header");
+  if (!host) return;
+
+  const group = document.createElement("div");
+  group.className = "lang-switch";
+  group.setAttribute("role", "group");
+  group.setAttribute("aria-label", "Langue / Language");
+
+  const names = { fr: "Français", en: "English" };
+  LANGUAGES.forEach((code) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = code.toUpperCase();
+    button.setAttribute("data-lang", code);
+    button.setAttribute("lang", code);
+    button.setAttribute("aria-label", names[code]);
+    button.addEventListener("click", () => setLanguage(code));
+    group.appendChild(button);
+  });
+
+  host.appendChild(group);
+}
+
+function updateSwitchState() {
+  document.querySelectorAll(".lang-switch [data-lang]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.getAttribute("data-lang") === currentLang));
+  });
+}
+
+/* t(valeur) : choisit le texte dans la langue courante.
+   - un texte simple ("Krita") est renvoyé tel quel, quelle que soit la langue ;
+   - un texte à deux versions ({ fr: "...", en: "..." }) renvoie la bonne ;
+   - une liste est traduite élément par élément ;
+   - si la langue demandée manque, on prend l'autre (français d'abord). */
+function t(value) {
+  if (Array.isArray(value)) return value.map(t);
+  if (value && typeof value === "object") {
+    const picked = value[currentLang] !== undefined
+      ? value[currentLang]
+      : (value.fr !== undefined ? value.fr : value.en);
+    return t(picked);
+  }
+  return value;
+}
+
+/* ui("clé") : texte de l'interface tiré de lang.js. {name} est remplacé par
+   ton nom. Renvoie "" si la clé n'existe pas (le texte du HTML reste alors). */
+function ui(key, vars) {
+  if (typeof UI === "undefined") return "";
+  const text = (UI[currentLang] && UI[currentLang][key] !== undefined)
+    ? UI[currentLang][key]
+    : (UI.fr ? UI.fr[key] : undefined);
+  if (typeof text !== "string") return "";
+
+  const values = Object.assign({ name: typeof ABOUT !== "undefined" ? t(ABOUT.name) : "" }, vars);
+  return text.replace(/\{(\w+)\}/g, (match, name) => (values[name] !== undefined ? values[name] : match));
+}
+
+/* Textes fixes écrits dans les pages HTML :
+   data-i18n="clé"             → remplace le texte de l'élément
+   data-i18n-aria-label="clé"  → remplace son aria-label */
+function applyStaticTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const text = ui(el.getAttribute("data-i18n"));
+    if (text) el.textContent = text;
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((el) => {
+    const text = ui(el.getAttribute("data-i18n-aria-label"));
+    if (text) el.setAttribute("aria-label", text);
+  });
+}
+
+/* Titre de l'onglet et descriptions (clés "meta.<page>.…" de lang.js).
+   La page est reconnue grâce à <body data-page="...">. */
+function applyPageMeta() {
+  const page = document.body.getAttribute("data-page");
+  if (!page) return;
+
+  const title = ui(`meta.${page}.title`);
+  const description = ui(`meta.${page}.description`);
+
+  if (title) {
+    document.title = title;
+    setMeta('meta[property="og:title"]', title);
+  }
+  if (description) {
+    setMeta('meta[name="description"]', description);
+    setMeta('meta[property="og:description"]', description);
+  }
+}
+
+function setMeta(selector, content) {
+  const el = document.querySelector(selector);
+  if (el) el.setAttribute("content", content);
+}
 
 /* -------------------------------------------------------------------------
    1. INFOS PERSO
@@ -26,22 +181,22 @@ document.addEventListener("DOMContentLoaded", () => {
    Exemple : <span data-about="email"></span> affichera l'email.
    Champs disponibles : name, status, email, internshipNote.
    Pour "links" et "softwares" et "bio" (listes), voir plus bas.
+   Chaque champ peut être un texte simple ou { fr: "...", en: "..." }.
    ----------------------------------------------------------------------- */
 function fillAboutInfo() {
   if (typeof ABOUT === "undefined") return;
 
   document.querySelectorAll("[data-about]").forEach((el) => {
-    const field = el.getAttribute("data-about");
-    if (typeof ABOUT[field] === "string") {
-      el.textContent = ABOUT[field];
-    }
+    const value = t(ABOUT[el.getAttribute("data-about")]);
+    if (typeof value === "string") el.textContent = value;
   });
 
   // Tagline (3 disciplines) → un <span> par discipline
   const taglineEl = document.querySelector("[data-about-tagline]");
-  if (taglineEl && Array.isArray(ABOUT.tagline)) {
+  const tagline = t(ABOUT.tagline);
+  if (taglineEl && Array.isArray(tagline)) {
     taglineEl.innerHTML = "";
-    ABOUT.tagline.forEach((word) => {
+    tagline.forEach((word) => {
       const span = document.createElement("span");
       span.textContent = word;
       taglineEl.appendChild(span);
@@ -50,9 +205,10 @@ function fillAboutInfo() {
 
   // Bio (page About) → un <p> par paragraphe
   const bioEl = document.querySelector("[data-about-bio]");
-  if (bioEl && Array.isArray(ABOUT.bio)) {
+  const bio = t(ABOUT.bio);
+  if (bioEl && Array.isArray(bio)) {
     bioEl.innerHTML = "";
-    ABOUT.bio.forEach((paragraph) => {
+    bio.forEach((paragraph) => {
       const p = document.createElement("p");
       p.textContent = paragraph;
       bioEl.appendChild(p);
@@ -61,14 +217,22 @@ function fillAboutInfo() {
 
   // Logiciels (page About) → liste horizontale
   const softwaresEl = document.querySelector("[data-about-softwares]");
-  if (softwaresEl && Array.isArray(ABOUT.softwares)) {
-    softwaresEl.textContent = ABOUT.softwares.join(", ");
+  const softwares = t(ABOUT.softwares);
+  if (softwaresEl && Array.isArray(softwares)) {
+    softwaresEl.textContent = softwares.join(", ");
   }
 
-  // Liens (LinkedIn, Instagram...) → utilisé dans le footer et la page About
+  // Liens (CV, LinkedIn, Instagram...) → utilisé dans le footer et la page About.
+  // Le lien CV pointe vers le fichier de la langue choisie (champ "cv" de about.js).
+  const links = (ABOUT.links || []).map((link) => ({ label: t(link.label), url: link.url }));
+  const cvPath = t(ABOUT.cv);
+  if (typeof cvPath === "string" && cvPath) {
+    links.unshift({ label: ui("cv.label") || "CV", url: cvPath });
+  }
+
   document.querySelectorAll("[data-about-links]").forEach((container) => {
     container.innerHTML = "";
-    ABOUT.links.forEach((link) => {
+    links.forEach((link) => {
       const li = document.createElement("li");
       const a = document.createElement("a");
       a.href = link.url;
@@ -117,6 +281,8 @@ function renderGallery() {
   container.innerHTML = "";
 
   items.forEach((work) => {
+    const title = t(work.title) || "";
+
     const item = document.createElement("article");
     item.className = "gallery-item";
     item.setAttribute("data-category", categoriesOf(work).join(" "));
@@ -137,7 +303,7 @@ function renderGallery() {
       const info = getEmbedInfo(work.media);
       const img = document.createElement("img");
       img.src = work.poster || (info && info.thumb) || "";
-      img.alt = work.title;
+      img.alt = title;
       img.loading = "lazy";
       // Si la miniature YouTube haute définition n'existe pas, on prend la standard.
       if (!work.poster && info && info.thumbFallback) {
@@ -147,7 +313,7 @@ function renderGallery() {
     } else {
       const img = document.createElement("img");
       img.src = work.media;
-      img.alt = work.title;
+      img.alt = title;
       img.loading = "lazy";
       link.appendChild(img);
     }
@@ -155,7 +321,7 @@ function renderGallery() {
     const caption = document.createElement("div");
     caption.className = "gallery-caption";
     caption.innerHTML = `
-      <div class="title">${escapeHtml(work.title)}</div>
+      <div class="title">${escapeHtml(title)}</div>
       <div class="category">${escapeHtml(categoryLabels(work))} — ${escapeHtml(work.year)}</div>
     `;
     link.appendChild(caption);
@@ -171,6 +337,7 @@ function renderGallery() {
    3. FILTRES (page Work)
    Cherche les boutons [data-filter] et affiche/masque les œuvres de la
    galerie en fonction de la catégorie choisie, sans recharger la page.
+   Le filtre choisi est conservé quand on change de langue.
    ----------------------------------------------------------------------- */
 function setupFilters(gallery) {
   const buttons = document.querySelectorAll("[data-filter]");
@@ -178,16 +345,21 @@ function setupFilters(gallery) {
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
-      const filter = button.getAttribute("data-filter");
-
       buttons.forEach((b) => b.setAttribute("aria-pressed", "false"));
       button.setAttribute("aria-pressed", "true");
-
-      gallery.querySelectorAll(".gallery-item").forEach((item) => {
-        const match = matchesFilter(item.getAttribute("data-category"), filter);
-        item.classList.toggle("is-hidden", !match);
-      });
+      applyCurrentFilter(gallery);
     });
+  });
+}
+
+function applyCurrentFilter(gallery) {
+  const active = document.querySelector("[data-filter][aria-pressed='true']");
+  if (!active || !gallery) return;
+
+  const filter = active.getAttribute("data-filter");
+  gallery.querySelectorAll(".gallery-item").forEach((item) => {
+    const match = matchesFilter(item.getAttribute("data-category"), filter);
+    item.classList.toggle("is-hidden", !match);
   });
 }
 
@@ -195,11 +367,11 @@ function setupFilters(gallery) {
    Apparition douce des vignettes au scroll (CSS + petit script d'appui).
    Respecte prefers-reduced-motion (voir style.css).
    ----------------------------------------------------------------------- */
-function setupScrollReveal() {
+function setupScrollReveal(showImmediately) {
   const items = document.querySelectorAll(".gallery-item");
   if (!items.length) return;
 
-  if (!("IntersectionObserver" in window)) {
+  if (showImmediately || !("IntersectionObserver" in window)) {
     items.forEach((item) => item.classList.add("is-visible"));
     return;
   }
@@ -235,22 +407,25 @@ function renderArtworkPage() {
   if (!work) {
     root.innerHTML = `
       <div class="not-found">
-        <p>Œuvre introuvable.</p>
-        <p><a class="button" href="work.html">Retour au portfolio</a></p>
+        <p>${escapeHtml(ui("artwork.notFound") || "Œuvre introuvable.")}</p>
+        <p><a class="button" href="work.html">${escapeHtml(ui("artwork.back") || "Retour au portfolio")}</a></p>
       </div>
     `;
     return;
   }
 
-  document.title = `${work.title} — ${ABOUT.name}`;
+  const title = t(work.title) || "";
+  const tools = t(work.tools);
+
+  document.title = `${title} — ${t(ABOUT.name)}`;
 
   document.querySelector("[data-artwork-category]").textContent =
     `${categoryLabels(work)} — ${work.year}`;
-  document.querySelector("[data-artwork-title]").textContent = work.title;
-  document.querySelector("[data-artwork-description]").textContent = work.description;
+  document.querySelector("[data-artwork-title]").textContent = title;
+  document.querySelector("[data-artwork-description]").textContent = t(work.description) || "";
 
   const toolsEl = document.querySelector("[data-artwork-tools]");
-  if (toolsEl) toolsEl.textContent = work.tools.join(", ");
+  if (toolsEl) toolsEl.textContent = Array.isArray(tools) ? tools.join(", ") : (tools || "");
 
   // Médias : on utilise "gallery" si présent (plusieurs images/vidéos),
   // sinon simplement le média principal (media/poster/type).
@@ -263,6 +438,7 @@ function renderArtworkPage() {
 
   mediaList.forEach((item) => {
     const figure = document.createElement("figure");
+    const caption = t(item.caption);
 
     // Le type est déduit de l'élément lui-même : lien YouTube/Vimeo → lecteur
     // intégré, fichier .mp4/.webm → lecteur vidéo, sinon → image.
@@ -274,7 +450,7 @@ function renderArtworkPage() {
       wrapper.className = "embed-wrapper";
       const iframe = document.createElement("iframe");
       iframe.src = embed.embedUrl;
-      iframe.title = item.caption || work.title;
+      iframe.title = caption || title;
       iframe.loading = "lazy";
       iframe.allow = "fullscreen; picture-in-picture";
       iframe.allowFullscreen = true;
@@ -289,7 +465,7 @@ function renderArtworkPage() {
       fallback.href = embed.watchUrl;
       fallback.target = "_blank";
       fallback.rel = "noopener";
-      fallback.textContent = `Voir sur ${embed.label} ↗`;
+      fallback.textContent = ui("artwork.watchOn", { platform: embed.label }) || `Voir sur ${embed.label} ↗`;
       figure.appendChild(fallback);
     } else if (isVideo) {
       const video = document.createElement("video");
@@ -301,14 +477,14 @@ function renderArtworkPage() {
     } else {
       const img = document.createElement("img");
       img.src = item.src;
-      img.alt = item.caption || work.title;
+      img.alt = caption || title;
       img.loading = "lazy";
       figure.appendChild(img);
     }
 
-    if (item.caption) {
+    if (caption) {
       const figcaption = document.createElement("figcaption");
-      figcaption.textContent = item.caption;
+      figcaption.textContent = caption;
       figure.appendChild(figcaption);
     }
 
@@ -322,8 +498,8 @@ function renderArtworkPage() {
 
   const prevLink = document.querySelector("[data-artwork-prev]");
   const nextLink = document.querySelector("[data-artwork-next]");
-  if (prevLink) { prevLink.href = `oeuvre.html?id=${prev.id}`; prevLink.textContent = `← ${prev.title}`; }
-  if (nextLink) { nextLink.href = `oeuvre.html?id=${next.id}`; nextLink.textContent = `${next.title} →`; }
+  if (prevLink) { prevLink.href = `oeuvre.html?id=${prev.id}`; prevLink.textContent = `← ${t(prev.title)}`; }
+  if (nextLink) { nextLink.href = `oeuvre.html?id=${next.id}`; nextLink.textContent = `${t(next.title)} →`; }
 }
 
 /* -------------------------------------------------------------------------

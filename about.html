@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nolwenn Louis</title>
+  <title>About — Prénom Nom</title>
   <meta name="description" content="À propos de Prénom Nom, étudiant en BUT MMI, character designer et illustrateur à la recherche d'un stage." />
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400;1,9..144,500&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="lang.css" />
 </head>
-<body>
+<body data-page="about">
 
   <header class="site-header container">
     <a class="logo" href="index.html" data-about="name">Prénom Nom</a>
-    <nav class="site-nav" aria-label="Navigation principale">
+    <nav class="site-nav" aria-label="Navigation principale" data-i18n-aria-label="aria.mainNav">
       <ul>
         <li><a href="work.html">Work</a></li>
         <li><a href="about.html" aria-current="page">About</a></li>
@@ -33,10 +34,10 @@
 
     <aside class="about-side">
       <dl>
-        <div class="row"><dt>Formation</dt><dd data-about="status">BUT MMI · Création numérique</dd></div>
-        <div class="row"><dt>Recherche</dt><dd data-about="internshipNote">Stage</dd></div>
-        <div class="row"><dt>Logiciels</dt><dd data-about-softwares></dd></div>
-        <div class="row"><dt>Email</dt><dd><a href="mailto:" data-about-email-link>email</a></dd></div>
+        <div class="row"><dt data-i18n="about.education">Formation</dt><dd data-about="status">BUT MMI · Création numérique</dd></div>
+        <div class="row"><dt data-i18n="about.looking">Recherche</dt><dd data-about="internshipNote">Stage</dd></div>
+        <div class="row"><dt data-i18n="about.software">Logiciels</dt><dd data-about-softwares></dd></div>
+        <div class="row"><dt data-i18n="about.email">Email</dt><dd><a href="mailto:" data-about-email-link>email</a></dd></div>
       </dl>
       <ul data-about-links style="margin-top: 1.5rem; display:flex; gap:1.25rem; font-size: 0.9rem;"></ul>
     </aside>
@@ -51,6 +52,7 @@
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
   <script src="works.js"></script>
   <script src="about.js"></script>
+  <script src="lang.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

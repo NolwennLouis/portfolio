@@ -9,12 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400;1,9..144,500&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="lang.css" />
 </head>
-<body>
+<body data-page="oeuvre">
 
   <header class="site-header container">
     <a class="logo" href="index.html" data-about="name">Prénom Nom</a>
-    <nav class="site-nav" aria-label="Navigation principale">
+    <nav class="site-nav" aria-label="Navigation principale" data-i18n-aria-label="aria.mainNav">
       <ul>
         <li><a href="work.html">Work</a></li>
         <li><a href="about.html">About</a></li>
@@ -27,14 +28,14 @@
       <p class="eyebrow" data-artwork-category></p>
       <h1 data-artwork-title></h1>
       <dl class="artwork-meta">
-        <div><dt>Outils —</dt> <dd data-artwork-tools></dd></div>
+        <div><dt data-i18n="artwork.tools">Outils —</dt> <dd data-artwork-tools></dd></div>
       </dl>
       <p class="artwork-description" data-artwork-description></p>
     </div>
 
     <div class="artwork-media" data-artwork-media></div>
 
-    <nav class="artwork-nav" aria-label="Œuvre précédente ou suivante">
+    <nav class="artwork-nav" aria-label="Œuvre précédente ou suivante" data-i18n-aria-label="aria.artworkNav">
       <a href="work.html" data-artwork-prev>← Précédent</a>
       <a href="work.html" data-artwork-next>Suivant →</a>
     </nav>
@@ -49,6 +50,7 @@
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
   <script src="works.js"></script>
   <script src="about.js"></script>
+  <script src="lang.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

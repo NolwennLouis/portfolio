@@ -1,0 +1,54 @@
+/* =========================================================================
+   lang.css — bouton FR / EN
+   (Fichier séparé pour ne pas toucher à style.css et à tes couleurs.)
+   ========================================================================= */
+
+/* l'en-tête peut passer à la ligne sur petit écran */
+.site-header {
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+/* la navigation contient maintenant les liens + le bouton de langue */
+.site-nav {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(1rem, 3vw, 2rem);
+}
+
+.lang-switch {
+  display: flex;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+}
+
+.lang-switch button {
+  padding: 0.15rem 0.45rem;
+  color: var(--fg-soft);
+  border-bottom: 1px solid transparent;
+}
+
+.lang-switch button:hover,
+.lang-switch button:focus-visible {
+  color: var(--fg);
+}
+
+.lang-switch button[aria-pressed="true"] {
+  color: var(--fg);
+  border-bottom-color: var(--accent);
+}
+
+/* après un changement de langue, la galerie est reconstruite :
+   pas besoin de rejouer l'apparition douce des vignettes */
+.gallery.no-fade .gallery-item {
+  opacity: 1;
+  animation: none;
+}
+
+/* Correctif d'alignement : l'en-tête et le pied de page gardent la même
+   marge latérale que le reste du site (ils étaient collés au bord de l'écran). */
+.site-header,
+.site-footer {
+  padding-left: clamp(1.25rem, 4vw, 3rem);
+  padding-right: clamp(1.25rem, 4vw, 3rem);
+}

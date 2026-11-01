@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nolwenn Louis — Character Design, Illustration, Animation 2D</title>
+  <title>Prénom Nom — Character Design, Illustration, Animation 2D</title>
   <meta name="description" content="Portfolio de Prénom Nom, étudiant en BUT MMI, orienté character design, illustration et animation 2D. Actuellement à la recherche d'un stage." />
   <meta property="og:title" content="Prénom Nom — Character Design, Illustration, Animation 2D" />
   <meta property="og:description" content="Portfolio de Prénom Nom — character design, illustration, animation 2D." />
@@ -13,12 +13,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400;1,9..144,500&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="lang.css" />
 </head>
-<body>
+<body data-page="index">
 
   <header class="site-header container">
-    <a class="logo" href="index.html" data-about="name">Nolwenn Louis</a>
-    <nav class="site-nav" aria-label="Navigation principale">
+    <a class="logo" href="index.html" data-about="name">Prénom Nom</a>
+    <nav class="site-nav" aria-label="Navigation principale" data-i18n-aria-label="aria.mainNav">
       <button class="nav-toggle" aria-expanded="false" aria-controls="nav-list" hidden>Menu</button>
       <ul id="nav-list">
         <li><a href="work.html">Work</a></li>
@@ -31,24 +32,25 @@
     <section class="hero">
       <div class="hero-bg" data-hero-bg aria-hidden="true"></div>
       <div class="container">
-      <p class="hero-kicker" data-about="status">Étudiante en BUT MMI Création numérique</p>
+      <p class="hero-kicker" data-about="status">Étudiant en BUT MMI · Création numérique</p>
 
       <h1 class="hero-title" data-about-tagline aria-label="Character Design, Illustration, 2D Animation">
         <span>Character Design</span>
+        <span>Illustration</span>
         <span>2D Animation</span>
       </h1>
 
       <div class="hero-meta">
         <p>
           <strong data-about="internshipNote">Actuellement à la recherche d'un stage</strong>
-          <br>dans un studio d'animation.
+          <span data-i18n="hero.lookingIn">— dans un studio d'animation, d'illustration ou de character design.</span>
         </p>
-        <a class="button" href="work.html">Voir le portfolio</a>
+        <a class="button" href="work.html" data-i18n="hero.cta">Voir le portfolio</a>
       </div>
       </div>
     </section>
 
-    <section class="container" aria-label="Sélection d'œuvres">
+    <section class="container" aria-label="Sélection d'œuvres" data-i18n-aria-label="aria.selection">
       <div class="gallery" data-gallery data-featured-only></div>
     </section>
   </main>
@@ -62,6 +64,7 @@
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
   <script src="works.js"></script>
   <script src="about.js"></script>
+  <script src="lang.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

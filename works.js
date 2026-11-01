@@ -198,8 +198,8 @@ const WORKS = [
     tools: ["Adobe Illustrator", "After Effects"],
     description:
       "Réalisation d'une émission de télévision en ligne dans le cadre d'un projet de cours. J'ai réalisé le design du personnage et des décors pour les génériques de début et de fin",
-    type: "video",
-    media: "videos/WEBTV2.mp4",
+    type: "embed",
+    media: "https://youtu.be/V0jYgceFjD0",
     poster: "images/minia-WebTV2.png",
     featured: false
   },
